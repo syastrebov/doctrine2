@@ -10,12 +10,15 @@ use Doctrine\Tests\Models\DDC3597\DDC3597Root;
 
 /**
  * @group DDC-117
+ * @group DDC-3597
+ * @group embedded
  */
 class DDC3597Test extends \Doctrine\Tests\OrmFunctionalTestCase
 {
     protected function setUp()
     {
         parent::setUp();
+
         $this->schemaTool->createSchema(
             [
             $this->em->getClassMetadata(DDC3597Root::class),
@@ -25,9 +28,6 @@ class DDC3597Test extends \Doctrine\Tests\OrmFunctionalTestCase
         );
     }
 
-    /**
-     * @group DDC-3597
-     */
     public function testSaveImageEntity()
     {
         $imageEntity = new DDC3597Image('foobar');
