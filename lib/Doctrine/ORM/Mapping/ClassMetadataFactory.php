@@ -425,21 +425,23 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
 
     private function buildValueGenerationPlan(ClassMetadata $class) : void
     {
-        $executors = $this->buildValueGenerationExecutorList($class);
+        $valueGenerationExecutorList = $this->buildValueGenerationExecutorList($class);
 
-        switch (count($executors)) {
+        switch (count($valueGenerationExecutorList)) {
             case 0:
-                $class->setValueGenerationPlan(new NoopValueGenerationPlan());
+                $valueGenerationPlan = new NoopValueGenerationPlan();
                 break;
 
             case 1:
-                $class->setValueGenerationPlan(new SingleValueGenerationPlan($class, $executors[0]));
+                $valueGenerationPlan = new SingleValueGenerationPlan($class, $valueGenerationExecutorList[0]);
                 break;
 
             default:
-                $class->setValueGenerationPlan(new CompositeValueGenerationPlan($class, $executors));
+                $valueGenerationPlan = new CompositeValueGenerationPlan($class, $valueGenerationExecutorList);
                 break;
         }
+
+        $class->setValueGenerationPlan($valueGenerationPlan);
     }
 
     /**
@@ -463,9 +465,13 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     private function buildValueGenerationExecutorForProperty(
         ClassMetadata $class,
         Property $property
-    ) : ?ValueGenerationExecutor {
+    ) : ?ValueGenerationExecutor
+    {
         if ($property instanceof LocalColumnMetadata && $property->hasValueGenerator()) {
-            return new ColumnValueGeneratorExecutor($property, $this->createPropertyValueGenerator($class, $property));
+            return new ColumnValueGeneratorExecutor(
+                $property,
+                $property->getValueGenerator()->getSequencingGenerator($property, $this->getTargetPlatform())
+            );
         }
 
         if ($property instanceof ToOneAssociationMetadata && $property->isPrimaryKey()) {
@@ -473,45 +479,5 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         }
 
         return null;
-    }
-
-    private function createPropertyValueGenerator(
-        ClassMetadata $class,
-        LocalColumnMetadata $property
-    ) : Sequencing\Generator {
-        $platform = $this->getTargetPlatform();
-
-        switch ($property->getValueGenerator()->getType()) {
-            case GeneratorType::IDENTITY:
-                $sequenceName = null;
-
-                // Platforms that do not have native IDENTITY support need a sequence to emulate this behaviour.
-                if ($platform->usesSequenceEmulatedIdentityColumns()) {
-                    $sequencePrefix = $platform->getSequencePrefix($class->getTableName(), $class->getSchemaName());
-                    $idSequenceName = $platform->getIdentitySequenceName($sequencePrefix, $property->getColumnName());
-                    $sequenceName   = $platform->quoteIdentifier($platform->fixSchemaElementName($idSequenceName));
-                }
-
-                return $property->getTypeName() === 'bigint'
-                    ? new Sequencing\BigIntegerIdentityGenerator($sequenceName)
-                    : new Sequencing\IdentityGenerator($sequenceName);
-
-            case GeneratorType::SEQUENCE:
-                $definition = $property->getValueGenerator()->getDefinition();
-                return new Sequencing\SequenceGenerator(
-                    $platform->quoteIdentifier($definition['sequenceName']),
-                    $definition['allocationSize']
-                );
-                break;
-
-            case GeneratorType::UUID:
-                return new Sequencing\UuidGenerator();
-                break;
-
-            case GeneratorType::CUSTOM:
-                $class = $property->getValueGenerator()->getDefinition()['class'];
-                return new $class();
-                break;
-        }
     }
 }
