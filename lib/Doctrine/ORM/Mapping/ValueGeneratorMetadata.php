@@ -72,17 +72,6 @@ class ValueGeneratorMetadata
 
         switch ($this->type) {
             case GeneratorType::IDENTITY:
-                $sequenceName = null;
-
-                // Platforms that do not have native IDENTITY support need a sequence to emulate this behaviour.
-                if ($platform->usesSequenceEmulatedIdentityColumns()) {
-                    $sequencePrefix = $platform->getSequencePrefix($class->getTableName(), $class->getSchemaName());
-                    $idSequenceName = $platform->getIdentitySequenceName($sequencePrefix, $this->declaringProperty->getColumnName());
-                    $sequenceName   = $platform->quoteIdentifier($platform->fixSchemaElementName($idSequenceName));
-
-                    return new Sequencing\SequenceGenerator($sequenceName, 1);
-                }
-
                 return $this->declaringProperty->getTypeName() === 'bigint'
                     ? new Sequencing\BigIntegerIdentityGenerator()
                     : new Sequencing\IdentityGenerator();
