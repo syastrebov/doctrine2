@@ -1100,7 +1100,7 @@ class MyNamespacedNamingStrategy extends DefaultNamingStrategy
     /**
      * {@inheritdoc}
      */
-    public function classToTableName($className)
+    public function classToTableName(string $className) : string
     {
         if (strpos($className, '\\') !== false) {
             $className = str_replace('\\', '_', str_replace('Doctrine\Tests\Models\\', '', $className));
@@ -1115,7 +1115,7 @@ class MyPrefixNamingStrategy extends DefaultNamingStrategy
     /**
      * {@inheritdoc}
      */
-    public function propertyToColumnName($propertyName, $className = null)
+    public function propertyToColumnName(string $propertyName, ?string $className = null) : string
     {
         return strtolower($this->classToTableName($className)) . '_' . $propertyName;
     }
