@@ -23,13 +23,11 @@ class AnnotationDriverTest extends AbstractMappingDriverTest
      */
     public function testLoadMetadataForNonEntityThrowsException()
     {
-        $cm = new ClassMetadata('stdClass', $this->metadataBuildingContext);
-
         $mappingDriver = $this->loadDriver();
 
         $this->expectException(MappingException::class);
 
-        $mappingDriver->loadMetadataForClass('stdClass', $cm, $this->metadataBuildingContext);
+        return $mappingDriver->loadMetadataForClass('stdClass', null, $this->metadataBuildingContext);
     }
 
     /**
@@ -40,8 +38,7 @@ class AnnotationDriverTest extends AbstractMappingDriverTest
     {
         $mappingDriver = $this->loadDriver();
 
-        $class = new ClassMetadata(AnnotationSLC::class, $this->metadataBuildingContext);
-        $mappingDriver->loadMetadataForClass(AnnotationSLC::class, $class, $this->metadataBuildingContext);
+        return $mappingDriver->loadMetadataForClass(AnnotationSLC::class, null, $this->metadataBuildingContext);
     }
 
     /**
@@ -49,11 +46,9 @@ class AnnotationDriverTest extends AbstractMappingDriverTest
      */
     public function testColumnWithMissingTypeDefaultsToString()
     {
-        $cm = new ClassMetadata(ColumnWithoutType::class, $this->metadataBuildingContext);
-
         $mappingDriver = $this->loadDriver();
 
-        $mappingDriver->loadMetadataForClass(ColumnWithoutType::class, $cm, $this->metadataBuildingContext);
+        $cm = $mappingDriver->loadMetadataForClass(ColumnWithoutType::class, null, $this->metadataBuildingContext);
 
         self::assertNotNull($cm->getProperty('id'));
 

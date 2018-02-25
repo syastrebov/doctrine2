@@ -689,7 +689,7 @@ class UnitOfWorkTest extends OrmTestCase
      */
     public function testCanInstantiateInternalPhpClassSubclass()
     {
-        $classMetadata = new ClassMetadata(MyArrayObjectEntity::class, $this->metadataBuildingContext);
+        $classMetadata = new ClassMetadata(MyArrayObjectEntity::class, null, $this->metadataBuildingContext);
 
         self::assertInstanceOf(MyArrayObjectEntity::class, $this->unitOfWork->newInstance($classMetadata));
     }
@@ -702,7 +702,7 @@ class UnitOfWorkTest extends OrmTestCase
         /* @var $classMetadata ClassMetadata */
         $classMetadata = unserialize(
             serialize(
-                new ClassMetadata(MyArrayObjectEntity::class, $this->metadataBuildingContext)
+                new ClassMetadata(MyArrayObjectEntity::class, null, $this->metadataBuildingContext)
             )
         );
 
