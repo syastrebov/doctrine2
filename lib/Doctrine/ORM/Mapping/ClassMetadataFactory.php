@@ -12,14 +12,11 @@ use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnClassMetadataNotFoundEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\ORMException;
-use Doctrine\ORM\Sequencing;
 use Doctrine\ORM\Sequencing\Planning\AssociationValueGeneratorExecutor;
-use Doctrine\ORM\Sequencing\Planning\ColumnValueGeneratorExecutor;
 use Doctrine\ORM\Sequencing\Planning\CompositeValueGenerationPlan;
 use Doctrine\ORM\Sequencing\Planning\NoopValueGenerationPlan;
 use Doctrine\ORM\Sequencing\Planning\SingleValueGenerationPlan;
 use Doctrine\ORM\Sequencing\Planning\ValueGenerationExecutor;
-use ReflectionException;
 use function array_map;
 use function class_exists;
 use function count;
@@ -357,7 +354,8 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
                 }
 
                 // @todo guilhermeblanco Move sequence generation to DBAL
-                $sequencePrefix = $platform->getSequencePrefix($field->getTableName(), $field->getSchemaName());
+                // @todo guilhermeblanco Bring back the sequence prefix generation with table schema name
+                $sequencePrefix = $platform->getSequencePrefix($field->getTableName()); //, $field->getSchemaName());
                 $idSequenceName = sprintf('%s_%s_seq', $sequencePrefix, $field->getColumnName());
                 $sequenceName   = $platform->fixSchemaElementName($idSequenceName);
 

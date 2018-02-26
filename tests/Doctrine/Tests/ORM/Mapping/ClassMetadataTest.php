@@ -304,11 +304,12 @@ class ClassMetadataTest extends OrmTestCase
         $cm = new ClassMetadata(CMS\CmsUser::class, null, $this->metadataBuildingContext);
         $cm->setTable(new Mapping\TableMetadata('cms_users'));
 
-        $property = new Mapping\VersionFieldMetadata('foo');
+        $property = new Mapping\FieldMetadata('foo');
 
         $property->setDeclaringClass($cm);
         $property->setColumnName('foo');
         $property->setType(Type::getType('string'));
+        $property->setVersioned(true);
 
         $this->expectException(MappingException::class);
 
@@ -373,7 +374,7 @@ class ClassMetadataTest extends OrmTestCase
         $cm->addInheritedProperty($association);
     }
 
-    public function testDuplicateColumnName_ThrowsMappingException()
+    public function testDuplicateColumnName()
     {
         $cm = new ClassMetadata(CMS\CmsUser::class, null, $this->metadataBuildingContext);
         $cm->setTable(new Mapping\TableMetadata('cms_users'));
@@ -384,39 +385,10 @@ class ClassMetadataTest extends OrmTestCase
 
         $cm->addProperty($fieldMetadata);
 
-        $this->expectException(MappingException::class);
-
-        $fieldMetadata = new Mapping\FieldMetadata('username');
-
-        $fieldMetadata->setType(Type::getType('string'));
-        $fieldMetadata->setColumnName('name');
-
-        $cm->addProperty($fieldMetadata);
+        self::assertTrue($cm->checkPropertyDuplication($fieldMetadata->getColumnName()));
     }
 
-    public function testDuplicateColumnName_DiscriminatorColumn_ThrowsMappingException()
-    {
-        $cm = new ClassMetadata(CMS\CmsUser::class, null, $this->metadataBuildingContext);
-        $cm->setTable(new Mapping\TableMetadata('cms_users'));
-
-        $fieldMetadata = new Mapping\FieldMetadata('name');
-
-        $fieldMetadata->setType(Type::getType('string'));
-
-        $cm->addProperty($fieldMetadata);
-
-        $discrColumn = new DiscriminatorColumnMetadata();
-
-        $discrColumn->setColumnName('name');
-        $discrColumn->setType(Type::getType('string'));
-        $discrColumn->setLength(255);
-
-        $this->expectException(\Doctrine\ORM\Mapping\MappingException::class);
-
-        $cm->setDiscriminatorColumn($discrColumn);
-    }
-
-    public function testDuplicateColumnName_DiscriminatorColumn2_ThrowsMappingException()
+    public function testDuplicateCDiscriminatorColumnName()
     {
         $cm = new ClassMetadata(CMS\CmsUser::class, null, $this->metadataBuildingContext);
         $cm->setTable(new Mapping\TableMetadata('cms_users'));
@@ -429,13 +401,7 @@ class ClassMetadataTest extends OrmTestCase
 
         $cm->setDiscriminatorColumn($discrColumn);
 
-        $this->expectException(\Doctrine\ORM\Mapping\MappingException::class);
-
-        $fieldMetadata = new Mapping\FieldMetadata('name');
-
-        $fieldMetadata->setType(Type::getType('string'));
-
-        $cm->addProperty($fieldMetadata);
+        self::assertTrue($cm->checkPropertyDuplication($discrColumn->getColumnName()));
     }
 
     public function testDuplicateFieldAndAssociationMapping1_ThrowsException()
