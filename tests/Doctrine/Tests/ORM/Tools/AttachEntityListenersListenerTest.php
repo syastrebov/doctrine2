@@ -93,11 +93,7 @@ class AttachEntityListenersListenerTest extends OrmTestCase
         self::assertEquals(AttachEntityListenersListenerTestListener2::class, $metadata->entityListeners['postPersist'][1]['class']);
     }
 
-    /**
-     * @expectedException \Doctrine\ORM\Mapping\MappingException
-     * @expectedExceptionMessage  Entity Listener "Doctrine\Tests\ORM\Tools\AttachEntityListenersListenerTestListener#postPersist()" in "Doctrine\Tests\ORM\Tools\AttachEntityListenersListenerTestFooEntity" was already declared, but it must be declared only once.
-     */
-    public function testDuplicateEntityListenerException()
+    public function testDoNotDuplicateEntityListener()
     {
         $this->listener->addEntityListener(
             AttachEntityListenersListenerTestFooEntity::class,
@@ -111,7 +107,9 @@ class AttachEntityListenersListenerTest extends OrmTestCase
             Events::postPersist
         );
 
-        $this->factory->getMetadataFor(AttachEntityListenersListenerTestFooEntity::class);
+        $class = $this->factory->getMetadataFor(AttachEntityListenersListenerTestFooEntity::class);
+
+        self::assertCount(1, $class->entityListeners[Events::postPersist]);
     }
 }
 
