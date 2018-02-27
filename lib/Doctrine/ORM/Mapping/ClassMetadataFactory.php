@@ -365,22 +365,6 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
                 throw new ORMException('TableGenerator not yet implemented.');
 
             case GeneratorType::CUSTOM:
-                $definition = $generator->getDefinition();
-
-                if (! isset($definition['class'])) {
-                    throw new ORMException(
-                        sprintf('Cannot instantiate custom generator, no class has been defined')
-                    );
-                }
-
-                if (! class_exists($definition['class'])) {
-                    throw new ORMException(
-                        sprintf('Cannot instantiate custom generator : %s', var_export($definition, true))
-                    );
-                }
-
-                break;
-
             case GeneratorType::IDENTITY:
             case GeneratorType::NONE:
             case GeneratorType::UUID:
